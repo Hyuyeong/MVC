@@ -1,15 +1,19 @@
 using Microsoft.EntityFrameworkCore;
 using MVC.Data;
+using MVC.Repository;
+using MVC.Repository.IRepository;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(opt =>
-    {
-        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-        opt.UseSqlite(connectionString);
-    });
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    opt.UseSqlite(connectionString);
+});
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 var app = builder.Build();
 
@@ -30,6 +34,7 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}"
+);
 
 app.Run();
