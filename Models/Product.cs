@@ -46,5 +46,5 @@ public class Product
     public Category Category { get; set; }
 
     [ValidateNever]
-    public string ImageUrl { get; set; }
+    public string ImageUrl { get; set; } = "https://placehold.co/500x600/png";
 }
