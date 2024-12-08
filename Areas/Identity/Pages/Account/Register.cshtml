@@ -62,6 +62,13 @@
                     <option disabled selected>--Select Role--</option>
                 </select>
             </div>
+            <div class="form-floating mb-3">
+                <select style="display: none;" asp-for="Input.CompanyId" asp-items="@Model.Input.CompanyList" class="form-select">
+                    <option disabled selected>--Select Company--</option>
+                
+                </select>
+                     <span asp-validation-for="Input.CompanyId" class="text-danger"></span>
+            </div>
             <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
         </form>
     </div>
@@ -99,4 +106,30 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function(){
+            $('#Input_Role').change(function(){
+                var selection =$('#Input_Role Option:Selected').text();
+                if(selection == 'Company'){
+                    $('#Input_CompanyId').show()
+                
+                }else{ 
+                    $('#Input_CompanyId').hide()
+                }
+            })   
+        })
+
+        $('#registerSubmit').click(function(){
+            var selection =$('#Input_Role Option:Selected').text();
+                if(selection == 'Company'){
+                    $('#Input_CompanyId').show()
+                
+                }else{ 
+                    $('#Input_CompanyId').hide()
+                }
+        })
+       
+    </script>
+
 }
