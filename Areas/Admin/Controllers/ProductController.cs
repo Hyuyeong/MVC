@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.IdentityModel.Tokens;
@@ -5,11 +6,13 @@ using MVC.Data;
 using MVC.Models;
 using MVC.Repository;
 using MVC.Repository.IRepository;
+using MVC.Utility;
 using MVC.ViewModels;
 
 namespace MVC.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = SD.Role_Admin)]
     public class ProductController : Controller
     {
         // GET: CategoryController
