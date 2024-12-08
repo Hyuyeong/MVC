@@ -1,11 +1,14 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MVC.Data;
 using MVC.Models;
 using MVC.Repository.IRepository;
+using MVC.Utility;
 
 namespace MVC.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = SD.Role_Admin)]
     public class CategoryController : Controller
     {
         // GET: CategoryController
