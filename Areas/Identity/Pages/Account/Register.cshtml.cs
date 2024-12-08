@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using MVC.Models;
+using MVC.Repository.IRepository;
 using MVC.Utility;
 
 namespace MVC.Areas.Identity.Pages.Account
@@ -34,6 +35,7 @@ namespace MVC.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<IdentityUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly IUnitOfWork _unitOfWork;
 
         public RegisterModel(
             UserManager<IdentityUser> userManager,
@@ -41,7 +43,8 @@ namespace MVC.Areas.Identity.Pages.Account
             IUserStore<IdentityUser> userStore,
             SignInManager<IdentityUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender
+            IEmailSender emailSender,
+            IUnitOfWork unitOfWork
         )
         {
             _userManager = userManager;
@@ -51,6 +54,7 @@ namespace MVC.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -132,6 +136,12 @@ namespace MVC.Areas.Identity.Pages.Account
 
             [Display(Name = "Phone")]
             public string? PhoneNumber { get; set; }
+
+            //Company
+            public int? CompanyId { get; set; }
+
+            [ValidateNever]
+            public IEnumerable<SelectListItem> CompanyList { get; set; }
         }
 
         public async Task OnGetAsync(string returnUrl = null)
@@ -158,6 +168,9 @@ namespace MVC.Areas.Identity.Pages.Account
                 RoleList = _roleManager
                     .Roles.Select(x => x.Name)
                     .Select(i => new SelectListItem { Text = i, Value = i }),
+                CompanyList = _unitOfWork
+                    .Company.GetAll()
+                    .Select(i => new SelectListItem { Text = i.Name, Value = i.Id.ToString() }),
             };
 
             ReturnUrl = returnUrl;
@@ -185,6 +198,11 @@ namespace MVC.Areas.Identity.Pages.Account
                 user.State = Input.State;
                 user.PostalCode = Input.PostalCode;
                 user.PhoneNumber = Input.PhoneNumber;
+
+                if (Input.Role == SD.Role_Company)
+                {
+                    user.CompanyId = Input.CompanyId;
+                }
 
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
@@ -247,6 +265,9 @@ namespace MVC.Areas.Identity.Pages.Account
                     RoleList = _roleManager
                         .Roles.Select(x => x.Name)
                         .Select(i => new SelectListItem { Text = i, Value = i }),
+                    CompanyList = _unitOfWork
+                        .Company.GetAll()
+                        .Select(i => new SelectListItem { Text = i.Name, Value = i.Id.ToString() }),
                 };
             }
 
