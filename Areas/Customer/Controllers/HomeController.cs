@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MVC.Models;
 using MVC.Repository.IRepository;
@@ -27,11 +29,47 @@ public class HomeController : Controller
 
     public IActionResult Details(int productId)
     {
-        Product product = _unitOfWork.Product.Get(
-            u => u.Id == productId,
-            includeProperties: "Category"
+        ShoppingCart cart = new()
+        {
+            Product = _unitOfWork.Product.Get(
+                u => u.Id == productId,
+                includeProperties: "Category"
+            ),
+            Count = 1,
+            ProductId = productId,
+        };
+
+        return View(cart);
+    }
+
+    [HttpPost]
+    [Authorize]
+    public IActionResult Details(ShoppingCart shoppingCart)
+    {
+        var claimsIdentity = (ClaimsIdentity)User.Identity;
+        var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+        shoppingCart.ApplicationUserId = userId;
+
+        ShoppingCart cartFromDb = _unitOfWork.ShoppingCart.Get(u =>
+            u.ApplicationUserId == userId && u.ProductId == shoppingCart.ProductId
         );
-        return View(product);
+
+        if (cartFromDb != null)
+        {
+            //shopping cart exists
+            cartFromDb.Count += shoppingCart.Count;
+            _unitOfWork.ShoppingCart.Update(cartFromDb);
+        }
+        else
+        {
+            //add cart record
+            _unitOfWork.ShoppingCart.Add(shoppingCart);
+        }
+
+        TempData["success"] = "Cart updated successfully";
+
+        _unitOfWork.Save();
+        return RedirectToAction(nameof(Index));
     }
 
     public IActionResult Privacy()
