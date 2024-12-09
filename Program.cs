@@ -5,6 +5,7 @@ using MVC.Data;
 using MVC.Repository;
 using MVC.Repository.IRepository;
 using MVC.Utility;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +33,8 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
 });
 
+builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -44,7 +47,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
+StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
 app.UseRouting();
 
 app.UseAuthentication();
